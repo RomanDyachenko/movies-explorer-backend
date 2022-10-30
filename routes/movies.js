@@ -23,8 +23,8 @@ router.post('/', express.json(), celebrate({
   thumbnail: Joi.string().required().uri(),
   owner: Joi.string().length(24).hex().required(),
   movieId: Joi.number().required(),
-  nameRU: Joi.string().pattern(/\W/gi).required(),
-  nameEN: Joi.string().pattern(/\w/gi).required(),
+  nameRU: Joi.string().pattern(/\W/i).required(),
+  nameEN: Joi.string().pattern(/\w/i).required(),
 }), postNewMovie);
 
 router.delete('/:id', express.json(), deleteMovie);

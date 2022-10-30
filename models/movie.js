@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 require('mongoose-type-url');
 
-const movieSchema = mongoose.model(
+const movieSchema = new mongoose.model(
   {
     country: {
       type: String,

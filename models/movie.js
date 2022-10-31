@@ -24,11 +24,11 @@ const movieSchema = new mongoose.Schema(
       required: true,
     },
     image: {
-      type: mongoose.SchemaTypes.Url,
+      type: mongoose.Schema.Types.Url,
       required: true,
     },
     trailerLink: {
-      type: mongoose.SchemaTypes.Url,
+      type: mongoose.Schema.Types.Url,
       required: true,
     },
     owner: {

@@ -40,11 +40,11 @@ app.get('/crash-test', () => {
 });
 
 app.post('/signup', express.json(), celebrate({
-  body: Joi.object.keys({
+  body: {
     name: Joi.string().min(2).max(30),
     email: Joi.string().email().required(),
     password: Joi.string().required(),
-  }),
+  },
 }), registerNewUser);
 
 app.post('/signin', express.json(), celebrate({

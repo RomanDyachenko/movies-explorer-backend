@@ -1,3 +1,4 @@
+/* eslint-disable consistent-return */
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
@@ -13,7 +14,7 @@ const getUserInfo = (req, res, next) => {
   User.findById(req.user.id)
     .then((user) => {
       if (!user) {
-        next(new NotFoundError('Такого пользователя не существует'));
+        return next(new NotFoundError('Такого пользователя не существует'));
       }
       res.send(user);
     })

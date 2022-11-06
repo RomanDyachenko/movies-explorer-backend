@@ -3,11 +3,10 @@ const helmet = require('helmet');
 const express = require('express');
 const { errors } = require('celebrate');
 const mongoose = require('mongoose');
+const { handleError } = require('./middlewares/handlerError');
 const { limiter } = require('./middlewares/rateLimiter');
 const auth = require('./middlewares/auth');
-const users = require('./routes/users');
-const movies = require('./routes/movies');
-const authentications = require('./routes/authentications');
+const { users, movies, authentications } = require('./routes/index');
 const NotFoundError = require('./errors/NotFoundError');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 const { handleCors } = require('./middlewares/handlerCors');
@@ -52,13 +51,4 @@ app.use(errorLogger);
 
 app.use(errors());
 
-app.use((err, req, res, next) => {
-  const { statusCode = 500, message } = err;
-
-  res.status(statusCode).send({
-    message: statusCode === 500
-      ? 'На сервере произошла ошибка'
-      : message,
-  });
-  next();
-});
+app.use(handleError);

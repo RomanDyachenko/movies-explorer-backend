@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 const Movie = require('../models/movie');
 const NotFoundError = require('../errors/NotFoundError');
 const BadRequestError = require('../errors/BadRequestError');
@@ -21,10 +20,21 @@ const getUserMovies = (req, res, next) => {
 
 const postNewMovie = (req, res, next) => {
   const {
-    country, director, duration, year, description, image, trailer, nameRU, nameEN, movieId,
+    country, director, duration, year, description, image, trailerLink, nameRU, nameEN, movieId,
   } = req.body;
+  const owner = req.user._id;
   Movie.create({
-    country, director, duration, year, description, image, trailer, nameRU, nameEN, movieId, owner: req.user._id,
+    country,
+    director,
+    duration,
+    year,
+    description,
+    image,
+    trailerLink,
+    nameRU,
+    nameEN,
+    movieId,
+    owner,
   })
     .then((movie) => {
       res.send(movie);
@@ -42,7 +52,7 @@ const deleteMovie = async (req, res, next) => {
   try {
     const movie = await Movie.findById(req.params.id);
     if (!movie) {
-      throw new NotFoundError('Пользователь с данным _id не найден');
+      throw new NotFoundError('Данный фильм не найден');
     }
     if ((movie.owner.equals(req.user._id))) {
       const id = await Movie.findByIdAndRemove(req.params.id);

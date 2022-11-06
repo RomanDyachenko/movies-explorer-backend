@@ -1,24 +1,23 @@
+require('dotenv').config();
+const helmet = require('helmet');
 const express = require('express');
-const { Joi, celebrate, errors } = require('celebrate');
+const { errors } = require('celebrate');
 const mongoose = require('mongoose');
+const limiter = require('./middlewares/rateLimiter');
 const auth = require('./middlewares/auth');
 const users = require('./routes/users');
 const movies = require('./routes/movies');
-const {
-  loginUser,
-  registerNewUser,
-} = require('./controllers/users');
+const authentications = require('./routes/authentications');
 const NotFoundError = require('./errors/NotFoundError');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 const { handleCors } = require('./middlewares/handlerCors');
-require('dotenv').config();
 
-const { PORT = 3000 } = process.env;
+const { PORT = 3000, NODE_ENV, MONGODB_ADDRESS } = process.env;
 
 const app = express();
 
 async function connect() {
-  await mongoose.connect('mongodb://localhost:27017/bitfilmsdb', {
+  await mongoose.connect(NODE_ENV === 'production' ? MONGODB_ADDRESS : 'mongodb://localhost:27017/dev-bitfilmsdb', {
     useNewUrlParser: true,
     useUnifiedTopology: false,
   });
@@ -29,36 +28,23 @@ async function connect() {
 
 connect();
 
+app.use(limiter);
+
+app.use(helmet());
+
 app.use(handleCors);
 
 app.use(requestLogger);
 
-app.get('/crash-test', () => {
-  setTimeout(() => {
-    throw new Error('Сервер сейчас упадёт');
-  }, 0);
-});
+app.use('/', authentications);
 
-app.post('/signup', express.json(), celebrate({
-  body: {
-    name: Joi.string().min(2).max(30),
-    email: Joi.string().email().required(),
-    password: Joi.string().required(),
-  },
-}), registerNewUser);
+app.use(auth);
 
-app.post('/signin', express.json(), celebrate({
-  body: Joi.object().keys({
-    email: Joi.string().email().required(),
-    password: Joi.string().required(),
-  }),
-}), loginUser);
+app.use('/users', users);
 
-app.use('/users', auth, users);
+app.use('/movies', movies);
 
-app.use('/movies', auth, movies);
-
-app.use(auth, ((req, res, next) => {
+app.use(((req, res, next) => {
   next(new NotFoundError('Маршрут не найден'));
 }));
 

@@ -2,6 +2,8 @@ const express = require('express');
 
 const { Joi, celebrate } = require('celebrate');
 
+const validator = require('validator');
+
 const {
   getUserMovies,
   postNewMovie,
@@ -19,10 +21,24 @@ router.post('/', express.json(), celebrate({
     duration: Joi.number().required(),
     year: Joi.string().required(),
     description: Joi.string().required(),
-    image: Joi.string().uri().required(),
-    trailerLink: Joi.string().uri().required(),
-    thumbnail: Joi.string().uri().required(),
-    owner: Joi.string().length(24).hex().required(),
+    image: Joi.string().required().custom((value, helpers) => {
+      if (validator.isURL(value)) {
+        return value;
+      }
+      return helpers.message('поле image заполнено не корректно');
+    }),
+    trailerLink: Joi.string().required().custom((value, helpers) => {
+      if (validator.isURL(value)) {
+        return value;
+      }
+      return helpers.message('поле trailerLink заполнено не корректно');
+    }),
+    thumbnail: Joi.string().required().custom((value, helpers) => {
+      if (validator.isURL(value)) {
+        return value;
+      }
+      return helpers.message('поле thumbnail заполнено не корректно');
+    }),
     movieId: Joi.number().required(),
     nameRU: Joi.string().pattern(/\W/i).required(),
     nameEN: Joi.string().pattern(/\w/i).required(),

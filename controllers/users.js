@@ -1,4 +1,3 @@
-/* eslint-disable consistent-return */
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
@@ -11,12 +10,13 @@ require('dotenv').config();
 const { NODE_ENV, JWT_SECRET } = process.env;
 
 const getUserInfo = (req, res, next) => {
-  User.findById(req.user.id)
+  User.findById(req.user._id)
     .then((user) => {
       if (!user) {
         return next(new NotFoundError('Такого пользователя не существует'));
       }
       res.send(user);
+      return user;
     })
     .catch((err) => {
       next(err);
@@ -45,6 +45,9 @@ const updateUserInfo = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new BadRequestError('Неверно заполнены данные пользователя'));
+      }
+      if (err.codeName === 'DuplicateKey') {
+        next(new ConflictError('Пользователь с данным email уже существует'));
       }
       next(err);
     });
@@ -79,11 +82,11 @@ const registerNewUser = (req, res, next) => {
     .then((hashedPassword) => User.create({
       email, password: hashedPassword, name,
     }))
-    // eslint-disable-next-line no-unused-vars
     .then((user) => {
       res.send({
         email, name,
       });
+      return user;
     })
     .catch((err) => {
       if (err.code === 11000) {
